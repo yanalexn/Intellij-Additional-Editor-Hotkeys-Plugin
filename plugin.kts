@@ -39,8 +39,16 @@ class SeparateLineReformatter : AnAction() {
     }
 
     private fun findEnclosingBrackets(text: String, cursorOffset: Int): TextRange? {
-        val openBrackets = setOf('(', '[', '{')
-        val closeBrackets = mapOf('(' to ')', '[' to ']', '{' to '}')
+        val openBrackets = setOf(
+            '(',
+            '[',
+//            '{'
+        )
+        val closeBrackets = mapOf(
+            '(' to ')',
+            '[' to ']',
+//            '{' to '}'
+        )
 
         var openPos = -1
         var closePos = -1
@@ -55,7 +63,9 @@ class SeparateLineReformatter : AnAction() {
                     stack.pop()
                 }
             } else if (text[i] in closeBrackets.values) {
-                stack.push(text[i])
+                if (i != cursorOffset) {
+                    stack.push(text[i])
+                }
             }
         }
 
@@ -113,4 +123,3 @@ class SeparateLineReformatter : AnAction() {
         }
     }
 }
-
