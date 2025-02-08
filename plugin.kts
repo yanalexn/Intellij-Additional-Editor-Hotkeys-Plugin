@@ -7,6 +7,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import liveplugin.registerAction
+import liveplugin.show
 import java.util.*
 
 registerAction(
@@ -25,10 +26,11 @@ class SeparateLineReformatter : AnAction() {
         val cursorOffset = editor.caretModel.offset
         val range = findEnclosingBrackets(document.text, cursorOffset) ?: return
         val text = document.getText(range)
+//        show(text)
         val modifiedText = if (text.contains("\n")) {
             joinParametersIntoSingleLine(text)
         } else {
-            replaceHighLevelCommas(text)
+            wrap(text)
         }
 
         WriteCommandAction.runWriteCommandAction(project) {
@@ -86,19 +88,33 @@ class SeparateLineReformatter : AnAction() {
             }
         }
 
-        return if (closePos != -1) TextRange(openPos + 1, closePos) else null
+        return if (closePos != -1) TextRange(openPos, closePos + 1) else null
     }
 
-    private fun replaceHighLevelCommas(text: String): String {
+    private fun wrap(text: String): String {
         val result = StringBuilder()
         var level = 0
         for (i in text.indices) {
             when (text[i]) {
-                '(', '[', '{' -> level++
-                ')', ']', '}' -> level--
-                ',' -> {
+                '(', '[', '{' -> {
+                    level++
+                    if (level == 1) {
+                        result.append("${text[i]}\n")
+                        continue
+                    }
+                }
+
+                ')', ']', '}' -> {
+                    level--
                     if (level == 0) {
-                        result.append(",\n") // Replace high-level commas with a newline
+                        result.append("\n${text[i]}")
+                        continue
+                    }
+                }
+
+                ',' -> {
+                    if (level == 1) {
+                        result.append(",\n")
                         continue
                     }
                 }
@@ -123,3 +139,4 @@ class SeparateLineReformatter : AnAction() {
         }
     }
 }
+
