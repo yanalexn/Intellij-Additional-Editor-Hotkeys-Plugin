@@ -159,13 +159,11 @@ class FieldSorter : AnAction() {
         val document = editor.document
 
         val text = document.text
-//        show(text)
         val modifiedText = sortFields(text)
 
         WriteCommandAction.runWriteCommandAction(project) {
             document.replaceString(0, text.length, modifiedText)
         }
-//        performReformatting(event, document)
     }
 
     private fun sortFields(text: String): String {
@@ -183,12 +181,13 @@ class FieldSorter : AnAction() {
             line.startsWith("private final") && line.endsWith(";")
         }
         val privateFieldsWithAnnotations = arrayListOf<String>()
-        val separatePrivateFieldsAndTheirAnnotations= arrayListOf<String>()
+        val separatePrivateFieldsAndTheirAnnotations = arrayListOf<String>()
         for (i in lines.indices) {
             val line = lines[i].trim()
             if (
                 line.startsWith("private")
                 && line.endsWith(";")
+                && !line.startsWith("private static final")
                 && !line.startsWith("private final")
             ) {
                 var j = i - 1
@@ -206,13 +205,16 @@ class FieldSorter : AnAction() {
                 privateFieldsWithAnnotations.add(multipleLinesAsSingleString)
             }
         }
-//        show(privateFieldsWithAnnotations)
         val otherLines = lines.filter {
             !publicStaticFinalFields.contains(it)
                     && !privateStaticFinalFields.contains(it)
                     && !privateFinalFields.contains(it)
                     && !separatePrivateFieldsAndTheirAnnotations.contains(it)
         }
+//        show(publicStaticFinalFields)
+//        show(privateStaticFinalFields)
+//        show(privateFinalFields)
+//        show(privateFieldsWithAnnotations)
 //        show(otherLines)
         val modifiedLines = arrayListOf<String>()
         var interruptIndex = -1
