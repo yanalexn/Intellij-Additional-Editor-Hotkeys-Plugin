@@ -241,7 +241,7 @@ class FieldSorter : AnAction() {
             privateFinalFields.sortedBy { it.length }
         )
         modifiedLines.addAll(
-            privateFieldsWithAnnotations.sortedBy { it.length }
+            privateFieldsWithAnnotations.sortedBy { it.substringAfter("private").length }
         )
         if (otherLines[interruptIndex + 1].trim() != "") {
             modifiedLines.add("")
